@@ -5,15 +5,21 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.DrawableRequestBuilder;
+import com.bumptech.glide.DrawableTypeRequest;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 import com.daimajia.slider.library.Animations.DescriptionAnimation;
 import com.daimajia.slider.library.Indicators.PagerIndicator;
 import com.daimajia.slider.library.SliderLayout;
@@ -21,6 +27,7 @@ import com.daimajia.slider.library.SliderTypes.BaseSliderView;
 import com.daimajia.slider.library.SliderTypes.TextSliderView;
 import com.daimajia.slider.library.Tricks.ViewPagerEx;
 
+import java.io.File;
 import java.util.HashMap;
 
 
@@ -47,13 +54,72 @@ public class MainActivity extends ActionBarActivity implements BaseSliderView.On
         file_maps.put("Game of Thrones", R.drawable.game_of_thrones);
 
         for(String name : file_maps.keySet()){
-            TextSliderView textSliderView = new TextSliderView(this);
+            //TextSliderView textSliderView = new TextSliderView(this);
+            BaseSliderView textSliderView = new BaseSliderView(this) {
+                @Override
+                public View getView() {
+                    View v = LayoutInflater.from(getContext()).inflate(com.daimajia.slider.library.R.layout.render_type_text,null);
+                    ImageView target = (ImageView)v.findViewById(com.daimajia.slider.library.R.id.daimajia_slider_image);
+                    TextView description = (TextView)v.findViewById(com.daimajia.slider.library.R.id.description);
+                    description.setText(getDescription());
+                    bindEventAndShow(v, target);
+                    return v;
+                }
+            };
             // initialize a SliderLayout
-            textSliderView
-                    .description(name)
-                    .image(file_maps.get(name))
-                    .setScaleType(BaseSliderView.ScaleType.Fit)
-                    .setOnSliderClickListener(this);
+            textSliderView.setImageLoader(new BaseSliderView.ImageLoader() {
+                RequestManager rm = Glide.with(MainActivity.this);
+
+                @Override
+                public void loadUrl(String url, BaseSliderView.ScaleType scaleType, ImageView view) {
+                    switch (scaleType){
+                        case Fit:
+                            rm.load(url).fitCenter().into(view);
+                            break;
+                        case CenterCrop:
+                            rm.load(url).centerCrop().into(view);
+                            break;
+                        case CenterInside:
+                            rm.load(url).centerCrop().into(view);
+                            break;
+                    }
+                }
+
+                @Override
+                public void loadFile(File file, BaseSliderView.ScaleType scaleType, ImageView view) {
+                    switch (scaleType){
+                        case Fit:
+                            rm.load(file).fitCenter().into(view);
+                            break;
+                        case CenterCrop:
+                            rm.load(file).centerCrop().into(view);
+                            break;
+                        case CenterInside:
+                            rm.load(file).centerCrop().into(view);
+                            break;
+                    }
+                }
+
+                @Override
+                public void loadResourceId(int resId, BaseSliderView.ScaleType scaleType, ImageView view) {
+                    switch (scaleType){
+                        case Fit:
+                            rm.load(resId).fitCenter().into(view);
+                            break;
+                        case CenterCrop:
+                            rm.load(resId).centerCrop().into(view);
+                            break;
+                        case CenterInside:
+                            rm.load(resId).centerCrop().into(view);
+                            break;
+                    }
+                }
+            });
+                    textSliderView
+                            .description(name)
+                            .image(file_maps.get(name))
+                            .setScaleType(BaseSliderView.ScaleType.Fit)
+                            .setOnSliderClickListener(this);
 
             //add your extra information
             textSliderView.bundle(new Bundle());
